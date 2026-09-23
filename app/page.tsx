@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import ArrowFillButton from "@/components/ui/arrow-fill-button";
+import ParallaxUnfurlingGallery from "@/components/ui/3d-parallax-unfurling-gallery";
 import { SiReact, SiNextdotjs, SiPython, SiTypescript, SiNodedotjs, SiTailwindcss, SiPostgresql, SiFramer, SiGit, SiPandas } from "react-icons/si";
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaGlobe } from "react-icons/fa";
 
@@ -196,7 +197,7 @@ export default function Home() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="min-h-screen relative overflow-hidden bg-bg-primary text-text-primary"
+      className="min-h-screen relative overflow-x-clip bg-bg-primary text-text-primary"
     >
       
       {/* 1. Background Grid */}
@@ -213,7 +214,7 @@ export default function Home() {
         <ul className="hidden md:flex gap-10 text-[15px] font-medium text-text-secondary">
           <li><Link href="/" className="text-accent hover:text-accent-hover transition-colors">Home</Link></li>
           <li><Link href="/about" className="hover:text-text-primary transition-colors">About</Link></li>
-          <li><Link href="/project" className="hover:text-text-primary transition-colors">Project</Link></li>
+          <li><Link href="#gallery" className="hover:text-text-primary transition-colors">Gallery</Link></li>
           <li><Link href="/certifications" className="hover:text-text-primary transition-colors">Certifications</Link></li>
           <li><Link href="/contact" className="hover:text-text-primary transition-colors">Contact Us</Link></li>
         </ul>
@@ -288,31 +289,7 @@ export default function Home() {
 
       </main>
 
-      {/* 10. Skills Marquee */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="w-full overflow-hidden bg-bg-secondary py-3 md:py-4 border-t border-border z-20 relative pointer-events-auto"
-      >
-        <div className="flex w-fit animate-marquee hover:[animation-play-state:paused]">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="flex items-center shrink-0">
-              {SKILLS.map((skill, index) => (
-                <div key={index} className="flex items-center">
-                  <div className="flex items-center gap-2.5 group">
-                    <skill.icon className="text-2xl md:text-3xl text-text-primary/40 group-hover:text-accent transition-colors cursor-default" />
-                    <span className="text-lg md:text-xl font-bold text-text-primary/40 group-hover:text-accent transition-colors cursor-default whitespace-nowrap">{skill.name}</span>
-                  </div>
-                  <span className="text-text-primary/10 text-sm md:text-base mx-8 md:mx-12">●</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* 11. Career Journey & About */}
+      {/* 10. Career Journey & About */}
       <section className="w-full relative z-20 pointer-events-auto bg-bg-primary">
         <div className="py-16 md:py-24 max-w-6xl mx-auto px-8 md:px-12">
           
@@ -447,6 +424,32 @@ export default function Home() {
 
         </div>
       </section>
+
+      {/* 11. Skills Marquee */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1, duration: 1 }}
+        className="w-full overflow-hidden bg-bg-secondary py-3 md:py-4 border-t border-border z-20 relative pointer-events-auto"
+      >
+        <div className="flex w-fit animate-marquee hover:[animation-play-state:paused]">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex items-center shrink-0">
+              {SKILLS.map((skill, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="flex items-center gap-2.5 group">
+                    <skill.icon className="text-2xl md:text-3xl text-text-primary/40 group-hover:text-accent transition-colors cursor-default" />
+                    <span className="text-lg md:text-xl font-bold text-text-primary/40 group-hover:text-accent transition-colors cursor-default whitespace-nowrap">{skill.name}</span>
+                  </div>
+                  <span className="text-text-primary/10 text-sm md:text-base mx-8 md:mx-12">●</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      <ParallaxUnfurlingGallery />
 
     </motion.div>
   );
