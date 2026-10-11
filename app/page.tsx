@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
 import ArrowFillButton from "@/components/ui/arrow-fill-button";
-import ParallaxUnfurlingGallery from "@/components/ui/3d-parallax-unfurling-gallery";
+import PageMascot from "@/components/PageMascot";
+import { ThemeToggle } from "@/components/ui/circular-theme-reveal";
+import { Testimonial } from "@/components/ui/design-testimonial";
+import ProjectsSection from "@/components/ProjectsSection";
 import { SiReact, SiNextdotjs, SiPython, SiTypescript, SiNodedotjs, SiTailwindcss, SiPostgresql, SiFramer, SiGit, SiPandas } from "react-icons/si";
 import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaGlobe } from "react-icons/fa";
 
@@ -161,7 +164,15 @@ const aboutSocialItemVariants: any = {
 // --- CUSTOM COMPONENT ---
 
 // CountUp component using framer-motion native primitives
-function StatItem({ value, label }: { value: number; label: React.ReactNode }) {
+function StatItem({ 
+  value, 
+  label, 
+  orientation = "horizontal" 
+}: { 
+  value: number; 
+  label: React.ReactNode; 
+  orientation?: "horizontal" | "vertical"; 
+}) {
   const count = useMotionValue(0);
   const rounded = useTransform(count, Math.round);
   const nodeRef = useRef(null);
@@ -174,6 +185,20 @@ function StatItem({ value, label }: { value: number; label: React.ReactNode }) {
       return controls.stop;
     }
   }, [inView, count, value]);
+
+  if (orientation === "vertical") {
+    return (
+      <motion.div variants={statItemVariants} className="flex flex-col items-center text-center gap-1 sm:gap-1.5" ref={nodeRef}>
+        <div className="flex items-center text-2xl sm:text-3xl font-bold text-text-primary">
+          <motion.span>{rounded}</motion.span>
+          <span>+</span>
+        </div>
+        <span className="text-[10px] sm:text-[11px] text-text-secondary tracking-[0.06em] uppercase leading-tight font-medium">
+          {label}
+        </span>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div variants={statItemVariants} className="flex items-center gap-5" ref={nodeRef}>
@@ -192,6 +217,8 @@ function StatItem({ value, label }: { value: number; label: React.ReactNode }) {
 // --- MAIN PAGE ---
 
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <motion.div 
       variants={containerVariants}
@@ -203,75 +230,183 @@ export default function Home() {
       {/* 1. Background Grid */}
       <motion.div 
         variants={bgVariants}
-        className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:4rem_4rem] z-0"
+        className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"
       />
 
       {/* 2. Navbar */}
-      <motion.nav variants={navVariants} className="flex justify-between items-center px-8 md:px-16 py-8 absolute top-0 w-full z-20">
+      <motion.nav variants={navVariants} className="flex justify-between items-center px-6 sm:px-8 md:px-16 py-6 md:py-8 absolute top-0 w-full z-30">
         <div className="font-serif italic text-2xl font-medium tracking-tight">
           Mohamad Arif
         </div>
-        <ul className="hidden md:flex gap-10 text-[15px] font-medium text-text-secondary">
-          <li><Link href="/" className="text-accent hover:text-accent-hover transition-colors">Home</Link></li>
-          <li><Link href="/about" className="hover:text-text-primary transition-colors">About</Link></li>
-          <li><Link href="#gallery" className="hover:text-text-primary transition-colors">Gallery</Link></li>
-          <li><Link href="/certifications" className="hover:text-text-primary transition-colors">Certifications</Link></li>
-          <li><Link href="/contact" className="hover:text-text-primary transition-colors">Contact Us</Link></li>
-        </ul>
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
+          <ul className="flex gap-10 text-[15px] font-medium text-text-secondary items-center">
+            <li><Link href="/" className="text-accent hover:text-accent-hover transition-colors">Home</Link></li>
+            <li><Link href="#about" className="hover:text-text-primary transition-colors">About</Link></li>
+            <li><Link href="#projects" className="hover:text-text-primary transition-colors">Projects</Link></li>
+            <li><Link href="/certifications" className="hover:text-text-primary transition-colors">Certifications</Link></li>
+            <li><Link href="/contact" className="hover:text-text-primary transition-colors">Contact Us</Link></li>
+          </ul>
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile: Toggle + Menu Button */}
+        <div className="md:hidden flex items-center gap-3">
+          <ThemeToggle />
+          <button
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
+            className="flex flex-col justify-center items-center w-11 h-11 rounded-lg text-text-primary hover:bg-bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={mobileMenuOpen ? "Tutup navigasi" : "Buka navigasi"}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`} />
+            <span className={`block w-5 h-0.5 bg-current my-1 transition-opacity duration-300 ${mobileMenuOpen ? "opacity-0" : ""}`} />
+            <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`} />
+          </button>
+        </div>
+
+        {/* Mobile Nav Dropdown */}
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:hidden absolute top-full left-0 w-full bg-bg-secondary/95 backdrop-blur-lg border-b border-border py-6 px-8 shadow-2xl z-30 flex flex-col gap-4 text-base font-medium"
+          >
+            <Link 
+              href="/" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-accent py-2 transition-colors min-h-[44px] flex items-center"
+            >
+              Home
+            </Link>
+            <Link 
+              href="#about" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
+            >
+              About
+            </Link>
+            <Link 
+              href="#projects" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
+            >
+              Projects
+            </Link>
+            <Link 
+              href="/certifications" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
+            >
+              Certifications
+            </Link>
+            <Link 
+              href="/contact" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
+            >
+              Contact Us
+            </Link>
+          </motion.div>
+        )}
       </motion.nav>
 
-      <main className="relative pt-[12vh] h-screen flex flex-col items-center justify-between pointer-events-none">
+      <main className="relative pt-24 sm:pt-28 md:pt-32 lg:pt-[12vh] min-h-screen lg:h-screen flex flex-col items-center justify-between pointer-events-none">
         
         {/* 3 & 4. Titles */}
-        <motion.div variants={titlesContainerVariants} className="text-center z-10 space-y-3 mt-4 pointer-events-auto">
+        <motion.div variants={titlesContainerVariants} className="text-center z-10 space-y-2 md:space-y-3 mt-2 sm:mt-4 px-4 pointer-events-auto">
           {/* Text reveal per-kata */}
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-text-primary flex justify-center gap-[0.25em] flex-wrap">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-text-primary flex justify-center gap-[0.25em] flex-wrap">
             {"Hi I'm Arif".split(" ").map((word, i) => (
               <motion.span key={i} variants={wordVariants} className="inline-block">
                 {word}
               </motion.span>
             ))}
           </h1>
-          <motion.h2 variants={subHeadingVariants} className="text-2xl md:text-4xl font-serif italic text-text-primary/90 font-light tracking-wide inline-block">
+          <motion.h2 variants={subHeadingVariants} className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-serif italic text-text-primary/90 font-light tracking-wide inline-block">
             Web Developer & Data Enthusiast
           </motion.h2>
+
+          {/* 7a. Mobile Description (Disimpan di bawah subtitle agar terbaca rapi di mobile) */}
+          <motion.p variants={subHeadingVariants} className="lg:hidden text-xs sm:text-sm text-text-secondary max-w-sm sm:max-w-md mx-auto pt-2 px-2 leading-relaxed font-normal">
+            Passionate web developer currently expanding into data science, driven to create smarter and more impactful digital solutions.
+          </motion.p>
         </motion.div>
 
-        {/* 5. Center Image */}
-        <motion.div variants={imageVariants} className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[600px] flex justify-center items-end z-0">
-          <Image 
-            src="/hero.png" 
-            alt="Mohamad Arif" 
-            width={600} 
-            height={800} 
-            className="object-contain w-auto h-[65vh] md:h-[72vh] object-bottom"
-            priority
-          />
+        {/* Mobile: Character Photo & Stats Card seamlessly integrated */}
+        <div className="lg:hidden relative w-full flex flex-col items-center mt-3 mb-4">
+          {/* Character Mascot - sits directly flush into the card top */}
+          <motion.div 
+            variants={imageVariants} 
+            className="relative z-0 -mb-5 sm:-mb-7 flex justify-center items-end w-full max-w-[320px] sm:max-w-[380px] pointer-events-auto"
+          >
+            <PageMascot size={300} />
+          </motion.div>
+
+          {/* Stats Card - character emerges seamlessly from behind this card */}
+          <motion.div 
+            variants={statsContainerVariants} 
+            className="relative z-10 w-[92%] max-w-md mx-auto grid grid-cols-3 gap-2 py-3.5 px-3 rounded-2xl bg-bg-secondary/95 border border-border backdrop-blur-md shadow-2xl pointer-events-auto"
+          >
+            <StatItem value={2} label={<>Years<br/>Experience</>} orientation="vertical" />
+            <StatItem value={15} label={<>Projects<br/>Completed</>} orientation="vertical" />
+            <StatItem value={8} label={<>Certificates<br/>Achieved</>} orientation="vertical" />
+          </motion.div>
+        </div>
+
+        {/* Desktop: Center Mascot (lg+) */}
+        <motion.div 
+          variants={imageVariants} 
+          className="hidden lg:flex absolute -bottom-6 xl:-bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[720px] justify-center items-end z-10 pointer-events-auto"
+        >
+          <PageMascot />
         </motion.div>
 
-        {/* 6. Left Stats */}
-        <motion.div variants={statsContainerVariants} className="hidden lg:flex absolute left-8 md:left-24 top-1/2 -translate-y-1/2 flex-col gap-10 z-10 pointer-events-auto">
+        {/* Desktop: Left Stats (lg+) */}
+        <motion.div variants={statsContainerVariants} className="hidden lg:flex absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 flex-col gap-10 z-10 pointer-events-auto">
           <StatItem value={2} label={<>Years<br/>Experience</>} />
           <StatItem value={15} label={<>Projects<br/>Completed</>} />
           <StatItem value={8} label={<>Certificates<br/>Achieved</>} />
         </motion.div>
 
-        {/* 7. Right Text */}
-        <motion.div variants={descVariants} className="hidden lg:block absolute right-8 md:right-24 top-1/2 -translate-y-1/2 w-72 z-10 pointer-events-auto">
+        {/* 7b. Desktop Right Text (lg+) */}
+        <motion.div variants={descVariants} className="hidden lg:block absolute right-8 md:right-16 lg:right-24 top-1/2 -translate-y-1/2 w-64 xl:w-72 z-10 pointer-events-auto">
           <p className="text-sm md:text-base text-text-primary leading-relaxed font-medium">
             Passionate web developer currently expanding into data science, driven to create smarter and more impactful digital solutions.
           </p>
         </motion.div>
 
-        {/* 9. Bottom Left Links */}
-        <motion.div variants={socialVariants} className="absolute bottom-10 left-8 md:left-24 flex gap-6 text-[15px] font-medium text-text-secondary z-10 pointer-events-auto">
-          <Link href="#" className="hover:text-text-primary transition-colors">LinkedIn</Link>
-          <Link href="#" className="hover:text-text-primary transition-colors">GitHub</Link>
-          <Link href="#" className="hover:text-text-primary transition-colors">Instagram</Link>
+        {/* 8a & 9a. Mobile Bottom Controls (< lg) */}
+        <div className="lg:hidden w-full px-6 pb-8 pt-1 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-5 z-10 pointer-events-auto max-w-md mx-auto">
+          <motion.div variants={socialVariants} className="flex gap-6 text-[15px] font-medium text-text-secondary">
+            <Link href="https://linkedin.com/in/mohamad-arif-68402627a" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">LinkedIn</Link>
+            <Link href="https://github.com/mohamadarif03" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">GitHub</Link>
+            <Link href="mailto:mohamadarif5392@gmail.com" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">Email</Link>
+          </motion.div>
+          <motion.div variants={buttonVariants}>
+            <ArrowFillButton 
+              href="/cv.pdf" 
+              btnText="Download CV" 
+              className="bg-accent hover:bg-accent-hover"
+              bgColor="#2563EB"
+              textColor="#ffffff"
+              fillBgColor="#ffffff"
+              fillTextColor="#2563EB"
+              hoverFillBgColor="#ffffff"
+              hoverFillTextColor="#1D4ED8"
+            />
+          </motion.div>
+        </div>
+
+        {/* 9b. Desktop Bottom Left Links (lg+) */}
+        <motion.div variants={socialVariants} className="hidden lg:flex absolute bottom-10 left-8 md:left-16 lg:left-24 gap-6 text-[15px] font-medium text-text-secondary z-10 pointer-events-auto">
+          <Link href="https://linkedin.com/in/mohamad-arif-68402627a" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">LinkedIn</Link>
+          <Link href="https://github.com/mohamadarif03" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">GitHub</Link>
+          <Link href="mailto:mohamadarif5392@gmail.com" className="hover:text-text-primary transition-colors">Email</Link>
         </motion.div>
 
-        {/* 8. Bottom Right Button */}
-        <motion.div variants={buttonVariants} className="absolute bottom-10 right-8 md:right-24 z-10 pointer-events-auto">
+        {/* 8b. Desktop Bottom Right Button (lg+) */}
+        <motion.div variants={buttonVariants} className="hidden lg:block absolute bottom-10 right-8 md:right-16 lg:right-24 z-10 pointer-events-auto">
           <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
             <ArrowFillButton 
               href="/cv.pdf" 
@@ -289,10 +424,47 @@ export default function Home() {
 
       </main>
 
-      {/* 10. Career Journey & About */}
-      <section className="w-full relative z-20 pointer-events-auto bg-bg-primary">
+      {/* Skills Marquee */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6, duration: 0.8 }}
+        className="w-full overflow-hidden bg-bg-secondary py-3 md:py-4 border-y border-border z-20 relative pointer-events-auto"
+      >
+        <div className="flex w-fit animate-marquee hover:[animation-play-state:paused]">
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="flex items-center shrink-0">
+              {SKILLS.map((skill, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="flex items-center gap-2.5 group">
+                    <skill.icon className="text-2xl md:text-3xl text-text-primary/40 group-hover:text-accent transition-colors cursor-default" />
+                    <span className="text-lg md:text-xl font-bold text-text-primary/40 group-hover:text-accent transition-colors cursor-default whitespace-nowrap">{skill.name}</span>
+                  </div>
+                  <span className="text-text-primary/10 text-sm md:text-base mx-8 md:mx-12">●</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* About & Career Journey Section */}
+      <section id="about" aria-labelledby="about-title" className="w-full relative z-20 pointer-events-auto bg-bg-primary">
         <div className="py-16 md:py-24 max-w-6xl mx-auto px-8 md:px-12">
           
+          {/* Section Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mb-12 md:mb-16"
+          >
+            <h2 id="about-title" className="text-3xl md:text-5xl font-bold tracking-tight text-text-primary">
+              About <span className="font-serif italic font-light text-text-primary/80">Me</span>
+            </h2>
+          </motion.div>
+
           <div className="grid grid-cols-1 md:grid-cols-[4fr_6fr] gap-12 lg:gap-20 items-center">
             {/* Left Column (Photo & Info) */}
             <div className="w-full">
@@ -374,7 +546,7 @@ export default function Home() {
                 viewport={{ once: true, amount: 0.3 }}
                 className="text-text-primary/90 leading-relaxed mb-12 text-sm md:text-base font-medium"
               >
-                A passionate web developer and data enthusiast focusing on creating intuitive digital experiences. I've collaborated with teams to design products that blend usability and aesthetics, focusing on solving problems through a design thinking journey process.
+                A passionate web developer and data enthusiast focusing on creating intuitive digital experiences. I&apos;ve collaborated with teams to design products that blend usability and aesthetics, focusing on solving problems through a design thinking journey process.
               </motion.p>
 
               {/* Animated Experience Timeline */}
@@ -425,31 +597,20 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 11. Skills Marquee */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="w-full overflow-hidden bg-bg-secondary py-3 md:py-4 border-t border-border z-20 relative pointer-events-auto"
-      >
-        <div className="flex w-fit animate-marquee hover:[animation-play-state:paused]">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="flex items-center shrink-0">
-              {SKILLS.map((skill, index) => (
-                <div key={index} className="flex items-center">
-                  <div className="flex items-center gap-2.5 group">
-                    <skill.icon className="text-2xl md:text-3xl text-text-primary/40 group-hover:text-accent transition-colors cursor-default" />
-                    <span className="text-lg md:text-xl font-bold text-text-primary/40 group-hover:text-accent transition-colors cursor-default whitespace-nowrap">{skill.name}</span>
-                  </div>
-                  <span className="text-text-primary/10 text-sm md:text-base mx-8 md:mx-12">●</span>
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      </motion.div>
+      {/* Testimonials Section */}
+      <section id="testimonials" aria-label="Key Highlights" className="w-full relative z-20 pointer-events-auto border-t border-border">
+        <Testimonial />
+      </section>
 
-      <ParallaxUnfurlingGallery />
+      {/* Projects Section */}
+      <div className="border-t border-border">
+        <ProjectsSection />
+      </div>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-border py-8 px-6 text-center text-xs font-mono text-text-secondary relative z-20 bg-bg-primary">
+        <p>&copy; {new Date().getFullYear()} Mohamad Arif. All rights reserved.</p>
+      </footer>
 
     </motion.div>
   );

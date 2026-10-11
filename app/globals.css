@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
-/* Design system tokens */
-@theme inline {
+:root {
   --color-bg-primary: #0B0F14;
   --color-bg-secondary: #12171F;
   --color-text-primary: #E7EAEE;
@@ -9,6 +8,38 @@
   --color-accent: #2563EB;
   --color-accent-hover: #1D4ED8;
   --color-border: #1F2733;
+
+  --background: var(--color-bg-primary);
+  --foreground: var(--color-text-primary);
+}
+
+[data-theme="light"], .light {
+  --color-bg-primary: #FAFAFA;
+  --color-bg-secondary: #F0F1F3;
+  --color-text-primary: #111318;
+  --color-text-secondary: #5B6270;
+  --color-accent: #2563EB;
+  --color-accent-hover: #1D4ED8;
+  --color-border: #E2E4E9;
+
+  --background: var(--color-bg-primary);
+  --foreground: var(--color-text-primary);
+  color-scheme: light;
+}
+
+/* Design system tokens */
+@theme inline {
+  --color-bg-primary: var(--color-bg-primary);
+  --color-bg-secondary: var(--color-bg-secondary);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-border: var(--color-border);
+
+  --color-background: var(--color-bg-primary);
+  --color-foreground: var(--color-text-primary);
+  --color-muted-foreground: var(--color-text-secondary);
 
   --font-sans: "General Sans", Inter, system-ui, sans-serif;
   
@@ -27,13 +58,12 @@
   font-display: swap;
 }
 
-:root {
-  --background: #0B0F14;
-  --foreground: #E7EAEE;
-}
-
 html {
   color-scheme: dark;
+}
+
+html[data-theme="light"], html.light {
+  color-scheme: light;
 }
 
 body {
