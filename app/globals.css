@@ -9,8 +9,16 @@
   --color-accent-hover: #1D4ED8;
   --color-border: #1F2733;
 
+  --color-background: var(--color-bg-secondary);
+  --color-foreground: var(--color-text-primary);
+  --color-muted-foreground: var(--color-text-secondary);
+
   --background: var(--color-bg-primary);
   --foreground: var(--color-text-primary);
+  --primary: var(--color-accent);
+  --secondary: var(--color-accent-hover);
+  --destructive: #EF4444;
+  --muted-foreground: var(--color-text-secondary);
 }
 
 [data-theme="light"], .light {
@@ -22,8 +30,16 @@
   --color-accent-hover: #1D4ED8;
   --color-border: #E2E4E9;
 
+  --color-background: var(--color-bg-secondary);
+  --color-foreground: var(--color-text-primary);
+  --color-muted-foreground: var(--color-text-secondary);
+
   --background: var(--color-bg-primary);
   --foreground: var(--color-text-primary);
+  --primary: var(--color-accent);
+  --secondary: var(--color-accent-hover);
+  --destructive: #EF4444;
+  --muted-foreground: var(--color-text-secondary);
   color-scheme: light;
 }
 

@@ -67,6 +67,30 @@ export default function KineticGrid({
   const rafRef = useRef<number>(0);
   const sizeRef = useRef<{ w: number; h: number }>({ w: 0, h: 0 });
 
+  const isLightRef = useRef(false);
+
+  useEffect(() => {
+    const updateTheme = () => {
+      const isLight = 
+        document.documentElement.getAttribute("data-theme") === "light" ||
+        document.documentElement.classList.contains("light");
+      isLightRef.current = isLight;
+    };
+
+    updateTheme();
+
+    const observer = new MutationObserver(() => {
+      updateTheme();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme", "class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   // ── Warp ────────────────────────────────────────────────────────────────────
 
   const getWarpedPoint = useCallback(
@@ -80,7 +104,7 @@ export default function KineticGrid({
       cols: number,
       rows: number,
     ): { pt: Point; proximity: number } => {
-      // Edge pin — smoothly locks boundary rows/cols in place
+      // Edge pin - smoothly locks boundary rows/cols in place
       const edgeMargin = 1.5;
       const colPin = Math.min(
         col / edgeMargin,
@@ -152,22 +176,29 @@ export default function KineticGrid({
       const mouse = mouseRef.current;
       const ripples = ripplesRef.current;
 
-      const theme = {
-        default: {
-          bg: "#161618",
-          lineActive: { r: 74, g: 158, b: 255, a: 0.9 },
-          nodeActive: { r: 74, g: 158, b: 255, a: 1.0 },
-          glow: "74,158,255",
-          ripple: "100,180,255",
-        },
-        monochrome: {
-          bg: "#000000",
-          lineActive: { r: 255, g: 255, b: 255, a: 0.9 },
-          nodeActive: { r: 255, g: 255, b: 255, a: 1.0 },
-          glow: "255,255,255",
-          ripple: "255,255,255",
-        },
-      }[globalColor ?? "default"];
+      const isLight = isLightRef.current;
+
+      const theme = isLight
+        ? {
+            bg: "#FAFAFA",
+            lineBase: { r: 17, g: 19, b: 24, a: 0.07 },
+            lineActive: { r: 37, g: 99, b: 235, a: 0.85 }, // #2563EB accent
+            nodeBase: { r: 17, g: 19, b: 24, a: 0.18 },
+            nodeActive: { r: 37, g: 99, b: 235, a: 1.0 },
+            dots: "rgba(17,19,24,0.04)",
+            glow: "37,99,235",
+            ripple: "37,99,235",
+          }
+        : {
+            bg: "#0B0F14",
+            lineBase: { r: 255, g: 255, b: 255, a: 0.12 },
+            lineActive: { r: 37, g: 99, b: 235, a: 0.9 }, // #2563EB accent
+            nodeBase: { r: 255, g: 255, b: 255, a: 0.2 },
+            nodeActive: { r: 37, g: 99, b: 235, a: 1.0 },
+            dots: "rgba(255,255,255,0.06)",
+            glow: "37,99,235",
+            ripple: "59,130,246",
+          };
 
       ctx.clearRect(0, 0, W, H);
 
@@ -176,7 +207,7 @@ export default function KineticGrid({
       ctx.fillRect(0, 0, W, H);
 
       // Static background dot texture
-      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.fillStyle = theme.dots;
       for (let x = DOT_SPACING / 2; x < W; x += DOT_SPACING) {
         for (let y = DOT_SPACING / 2; y < H; y += DOT_SPACING) {
           ctx.beginPath();
@@ -230,7 +261,7 @@ export default function KineticGrid({
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
-        ctx.strokeStyle = lerpColor(LINE_BASE, theme.lineActive, t);
+        ctx.strokeStyle = lerpColor(theme.lineBase, theme.lineActive, t);
         ctx.lineWidth = lerpN(0.8, 1.5, t);
         ctx.stroke();
       };
@@ -286,7 +317,7 @@ export default function KineticGrid({
           ctx.beginPath();
           ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
           ctx.fillStyle = lerpColor(
-            { r: 255, g: 255, b: 255, a: 0.2 },
+            theme.nodeBase,
             theme.nodeActive,
             t,
           );
@@ -331,8 +362,9 @@ export default function KineticGrid({
     if (!canvas) return;
 
     const setSize = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+      const rect = canvas.getBoundingClientRect();
+      const w = rect.width || window.innerWidth;
+      const h = rect.height || window.innerHeight;
       canvas.width = w;
       canvas.height = h;
       sizeRef.current = { w, h };
@@ -346,13 +378,18 @@ export default function KineticGrid({
     window.addEventListener("resize", setSize);
 
     const onMouseMove = (e: MouseEvent) => {
-      targetMouseRef.current = { x: e.clientX, y: e.clientY };
+      const rect = canvas.getBoundingClientRect();
+      targetMouseRef.current = { 
+        x: e.clientX - rect.left, 
+        y: e.clientY - rect.top 
+      };
     };
 
     const onClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
       ripplesRef.current.push({
-        x: e.clientX,
-        y: e.clientY,
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
         radius: 0,
         opacity: 1,
         born: performance.now(),
@@ -378,14 +415,13 @@ export default function KineticGrid({
   return (
     <div
       className={cn(
-        "relative w-full min-h-screen overflow-hidden",
-        globalColor === "monochrome" ? "bg-[#000000]" : "bg-[#161618]",
+        "relative w-full overflow-hidden",
         className,
       )}
     >
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 w-full h-full z-0 pointer-events-none"
+        className="absolute inset-0 w-full h-full z-0 pointer-events-none"
       />
 
       <div className="relative z-10 w-full h-full">{children}</div>

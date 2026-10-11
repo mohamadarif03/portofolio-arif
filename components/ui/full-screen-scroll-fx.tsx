@@ -343,7 +343,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
         });
       }
 
-      // backgrounds — FADE mode (requested)
+      // backgrounds - FADE mode (requested)
       const prevBg = bgRefs.current[from];
       const newBg = bgRefs.current[to];
       if (bgTransition === "fade") {
@@ -375,7 +375,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
         }
       }
 
-      // lists — center active row and animate active state
+      // lists - center active row and animate active state
       measureAndCenterLists(to, true);
 
       leftItemRefs.current.forEach((el, i) => {

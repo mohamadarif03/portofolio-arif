@@ -2,8 +2,8 @@
 
 import type React from "react"
 
-import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { useState, useRef } from "react"
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll, useMotionValueEvent } from "framer-motion"
 
 const testimonials = [
   {
@@ -28,7 +28,25 @@ const testimonials = [
 
 export function Testimonial() {
   const [activeIndex, setActiveIndex] = useState(0)
+  const wrapperRef = useRef<HTMLDivElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Scroll pinning: wrap in 300vh so user scrolls through 3 distinct steps while screen stays pinned
+  const { scrollYProgress } = useScroll({
+    target: wrapperRef,
+    offset: ["start start", "end end"],
+  })
+
+  useMotionValueEvent(scrollYProgress, "change", (latest) => {
+    // Map latest (0 to 1) into indices 0, 1, 2
+    if (latest < 0.33) {
+      setActiveIndex(0)
+    } else if (latest < 0.67) {
+      setActiveIndex(1)
+    } else {
+      setActiveIndex(2)
+    }
+  })
 
   // Mouse position for magnetic effect
   const mouseX = useMotionValue(0)
@@ -55,72 +73,12 @@ export function Testimonial() {
   const goNext = () => setActiveIndex((prev) => (prev + 1) % testimonials.length)
   const goPrev = () => setActiveIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
 
-  // Handle scroll / wheel trigger to change slides
-  const isThrottled = useRef(false)
-  const touchStartY = useRef<number | null>(null)
-
-  useEffect(() => {
-    const element = containerRef.current
-    if (!element) return
-
-    const handleWheel = (e: WheelEvent) => {
-      // If user is clearly scrolling vertically within this component
-      if (Math.abs(e.deltaY) < 30) return
-
-      if (isThrottled.current) return
-
-      // If scrolling down -> next slide, scrolling up -> prev slide
-      if (e.deltaY > 0) {
-        // Only prevent page scroll if we haven't reached the last slide, or smoothly advance
-        goNext()
-      } else {
-        goPrev()
-      }
-
-      isThrottled.current = true
-      setTimeout(() => {
-        isThrottled.current = false
-      }, 700)
-    }
-
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartY.current = e.touches[0].clientY
-    }
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (touchStartY.current === null) return
-      const diffY = touchStartY.current - e.changedTouches[0].clientY
-      touchStartY.current = null
-
-      if (Math.abs(diffY) > 50 && !isThrottled.current) {
-        if (diffY > 0) {
-          goNext()
-        } else {
-          goPrev()
-        }
-        isThrottled.current = true
-        setTimeout(() => {
-          isThrottled.current = false
-        }, 700)
-      }
-    }
-
-    element.addEventListener("wheel", handleWheel, { passive: true })
-    element.addEventListener("touchstart", handleTouchStart, { passive: true })
-    element.addEventListener("touchend", handleTouchEnd, { passive: true })
-
-    return () => {
-      element.removeEventListener("wheel", handleWheel)
-      element.removeEventListener("touchstart", handleTouchStart)
-      element.removeEventListener("touchend", handleTouchEnd)
-    }
-  }, [])
-
   const current = testimonials[activeIndex]
 
   return (
-    <div className="flex items-center justify-center py-20 md:py-28 bg-background overflow-hidden relative">
-      <div ref={containerRef} className="relative w-full max-w-5xl px-4 sm:px-6 md:px-8" onMouseMove={handleMouseMove}>
+    <div ref={wrapperRef} className="relative w-full h-[260vh] lg:h-[300vh]">
+      <div className="sticky top-0 h-screen w-full flex items-center justify-center bg-background overflow-hidden">
+        <div ref={containerRef} className="relative w-full max-w-5xl px-4 sm:px-6 md:px-8" onMouseMove={handleMouseMove}>
         {/* Oversized index number - positioned to bleed off left edge */}
         <motion.div
           className="absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2 text-[14rem] sm:text-[20rem] md:text-[28rem] font-bold text-foreground/[0.04] select-none pointer-events-none leading-none tracking-tighter"
@@ -338,6 +296,7 @@ export function Testimonial() {
               </span>
             ))}
           </motion.div>
+        </div>
         </div>
       </div>
     </div>

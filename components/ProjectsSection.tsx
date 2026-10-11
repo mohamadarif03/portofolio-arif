@@ -13,27 +13,36 @@ export default function ProjectsSection() {
   const isHeaderInView = useInView(headerRef, { once: true, margin: "-60px" });
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleScroll = () => {
-      const section = sectionRef.current;
-      const track = trackRef.current;
-      if (!section || !track) return;
+      if (rafId !== null) return;
 
-      // On tablet and mobile (<= 1024px), it flows vertically
-      if (window.innerWidth <= 1024) {
-        track.style.transform = "none";
-        return;
-      }
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const section = sectionRef.current;
+        const track = trackRef.current;
+        if (!section || !track) return;
 
-      const scrollableDistance = section.offsetHeight - window.innerHeight;
-      if (scrollableDistance > 0) {
-        const sectionTop = section.offsetTop;
-        const clampedProgress = Math.max(
-          0,
-          Math.min(1, (window.scrollY - sectionTop) / scrollableDistance)
-        );
-        const maxScroll = track.scrollWidth - window.innerWidth + 80;
-        track.style.transform = `translateX(-${clampedProgress * maxScroll}px)`;
-      }
+        // On tablet and mobile (<= 1024px), it flows vertically
+        if (window.innerWidth <= 1024) {
+          track.style.transform = "none";
+          return;
+        }
+
+        const scrollableDistance = section.offsetHeight - window.innerHeight;
+        if (scrollableDistance > 0) {
+          const rect = section.getBoundingClientRect();
+          // Distance scrolled since the section top touched the top of the viewport
+          const scrolled = -rect.top;
+          const clampedProgress = Math.max(
+            0,
+            Math.min(1, scrolled / scrollableDistance)
+          );
+          const maxScroll = Math.max(0, track.scrollWidth - window.innerWidth + 80);
+          track.style.transform = `translateX(-${clampedProgress * maxScroll}px)`;
+        }
+      });
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -43,6 +52,7 @@ export default function ProjectsSection() {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
+      if (rafId !== null) cancelAnimationFrame(rafId);
     };
   }, []);
 
@@ -83,9 +93,10 @@ export default function ProjectsSection() {
           className="flex flex-col lg:flex-row gap-6 sm:gap-8 lg:gap-8 will-change-transform lg:px-5 max-w-6xl lg:max-w-none mx-auto w-full transition-transform duration-75 ease-out"
         >
           {projects.map((project, index) => (
-            <div
+            <Link
               key={project.slug}
-              className="group relative w-full lg:w-[680px] xl:w-[720px] lg:shrink-0 rounded-2xl overflow-hidden border border-border bg-bg-secondary transition-all duration-300 hover:border-accent/40 hover:scale-[1.01]"
+              href={`/project/${project.slug}`}
+              className="group relative w-full lg:w-[680px] xl:w-[720px] lg:shrink-0 rounded-2xl overflow-hidden border border-border bg-bg-secondary transition-all duration-300 hover:border-accent/40 hover:scale-[1.01] block cursor-pointer"
             >
               {/* Image Container with 16:9 ratio */}
               <div className="relative w-full aspect-[16/9] overflow-hidden bg-bg-secondary">
@@ -128,7 +139,7 @@ export default function ProjectsSection() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

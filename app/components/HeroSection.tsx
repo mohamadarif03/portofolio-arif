@@ -31,7 +31,7 @@ function IconLinkedin({ size = 20 }: { size?: number }) {
   );
 }
 
-/* Animation variants — fade-in + slide-up, staggered */
+/* Animation variants: fade-in + slide-up, staggered */
 const container = {
   hidden: {},
   show: {
@@ -56,7 +56,7 @@ export default function HeroSection() {
       aria-label="Hero"
       className="relative flex items-center min-h-[100svh] bg-[#0B0F14] px-6 py-20 md:px-12"
     >
-      {/* Subtle dot-grid texture — low-opacity, no color, purely structural */}
+      {/* Subtle dot-grid texture: low-opacity, no color, purely structural */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-[0.035]"
@@ -97,7 +97,7 @@ export default function HeroSection() {
             variants={item}
             className="text-base md:text-lg font-medium text-[#9AA4B2] leading-snug max-w-[52ch]"
           >
-            Web Developer &amp; Data Enthusiast — Membangun solusi digital yang
+            Web Developer &amp; Data Enthusiast: Membangun solusi digital yang
             lebih cerdas.
           </motion.p>
 
@@ -136,7 +136,7 @@ export default function HeroSection() {
             aria-label="Tautan media sosial"
           >
             <a
-              href="https://github.com"
+              href="https://github.com/mohamadarif03"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub Arif"
@@ -145,7 +145,7 @@ export default function HeroSection() {
               <IconGithub size={20} />
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/in/mohamad-arif-68402627a/"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="LinkedIn Arif"

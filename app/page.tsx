@@ -3,14 +3,20 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, useTransform, animate, useInView } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate, useInView, useScroll, useMotionValueEvent } from "framer-motion";
 import ArrowFillButton from "@/components/ui/arrow-fill-button";
 import PageMascot from "@/components/PageMascot";
 import { ThemeToggle } from "@/components/ui/circular-theme-reveal";
 import { Testimonial } from "@/components/ui/design-testimonial";
 import ProjectsSection from "@/components/ProjectsSection";
+import PanoramicSpreadHero from "@/components/ui/panoramic-spread-hero";
+import KineticGrid from "@/components/ui/kinetic-grid";
+import GithubSkylineSection from "@/components/GithubSkylineSection";
+import CinematicFooter from "@/components/ui/motion-footer";
+import SiteNavbar from "@/components/SiteNavbar";
 import { SiReact, SiNextdotjs, SiPython, SiTypescript, SiNodedotjs, SiTailwindcss, SiPostgresql, SiFramer, SiGit, SiPandas } from "react-icons/si";
-import { FaGithub, FaTwitter, FaLinkedin, FaInstagram, FaGlobe } from "react-icons/fa";
+import { FaGithub, FaLinkedin, FaInstagram, FaEnvelope, FaGlobe } from "react-icons/fa";
+import { cn } from "@/lib/utils";
 
 const SKILLS = [
   { name: 'React', icon: SiReact },
@@ -217,7 +223,21 @@ function StatItem({
 // --- MAIN PAGE ---
 
 export default function Home() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { scrollY } = useScroll();
+  const [isPastHero, setIsPastHero] = useState(false);
+
+  useEffect(() => {
+    const checkScroll = () => {
+      const threshold = window.innerHeight;
+      setIsPastHero(window.scrollY >= threshold);
+    };
+    checkScroll();
+  }, []);
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    const threshold = typeof window !== "undefined" ? window.innerHeight : 800;
+    setIsPastHero(latest >= threshold);
+  });
 
   return (
     <motion.div 
@@ -227,91 +247,19 @@ export default function Home() {
       className="min-h-screen relative overflow-x-clip bg-bg-primary text-text-primary"
     >
       
-      {/* 1. Background Grid */}
-      <motion.div 
-        variants={bgVariants}
-        className="absolute inset-0 bg-[linear-gradient(to_right,#8080801a_1px,transparent_1px),linear-gradient(to_bottom,#8080801a_1px,transparent_1px)] bg-[size:4rem_4rem] z-0 pointer-events-none"
-      />
+      {/* Sticky Animated Navbar */}
+      <SiteNavbar />
 
-      {/* 2. Navbar */}
-      <motion.nav variants={navVariants} className="flex justify-between items-center px-6 sm:px-8 md:px-16 py-6 md:py-8 absolute top-0 w-full z-30">
-        <div className="font-serif italic text-2xl font-medium tracking-tight">
-          Mohamad Arif
-        </div>
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
-          <ul className="flex gap-10 text-[15px] font-medium text-text-secondary items-center">
-            <li><Link href="/" className="text-accent hover:text-accent-hover transition-colors">Home</Link></li>
-            <li><Link href="#about" className="hover:text-text-primary transition-colors">About</Link></li>
-            <li><Link href="#projects" className="hover:text-text-primary transition-colors">Projects</Link></li>
-            <li><Link href="/certifications" className="hover:text-text-primary transition-colors">Certifications</Link></li>
-            <li><Link href="/contact" className="hover:text-text-primary transition-colors">Contact Us</Link></li>
-          </ul>
-          <ThemeToggle />
-        </div>
-
-        {/* Mobile: Toggle + Menu Button */}
-        <div className="md:hidden flex items-center gap-3">
-          <ThemeToggle />
-          <button
-            onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className="flex flex-col justify-center items-center w-11 h-11 rounded-lg text-text-primary hover:bg-bg-secondary focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            aria-label={mobileMenuOpen ? "Tutup navigasi" : "Buka navigasi"}
-            aria-expanded={mobileMenuOpen}
-          >
-            <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-current my-1 transition-opacity duration-300 ${mobileMenuOpen ? "opacity-0" : ""}`} />
-            <span className={`block w-5 h-0.5 bg-current transition-transform duration-300 ${mobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`} />
-          </button>
-        </div>
-
-        {/* Mobile Nav Dropdown */}
-        {mobileMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="md:hidden absolute top-full left-0 w-full bg-bg-secondary/95 backdrop-blur-lg border-b border-border py-6 px-8 shadow-2xl z-30 flex flex-col gap-4 text-base font-medium"
-          >
-            <Link 
-              href="/" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-accent py-2 transition-colors min-h-[44px] flex items-center"
-            >
-              Home
-            </Link>
-            <Link 
-              href="#about" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
-            >
-              About
-            </Link>
-            <Link 
-              href="#projects" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
-            >
-              Projects
-            </Link>
-            <Link 
-              href="/certifications" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
-            >
-              Certifications
-            </Link>
-            <Link 
-              href="/contact" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-text-secondary hover:text-text-primary py-2 transition-colors min-h-[44px] flex items-center"
-            >
-              Contact Us
-            </Link>
-          </motion.div>
+      {/* Hero Section (Stationary Pinned Hero) */}
+      <div 
+        className={cn(
+          "sticky top-0 h-screen w-full z-0 overflow-hidden bg-bg-primary",
+          isPastHero && "invisible pointer-events-none"
         )}
-      </motion.nav>
-
-      <main className="relative pt-24 sm:pt-28 md:pt-32 lg:pt-[12vh] min-h-screen lg:h-screen flex flex-col items-center justify-between pointer-events-none">
+      >
+        <div className="h-full w-full">
+          <KineticGrid className="h-full w-full relative">
+            <main className="relative pt-24 sm:pt-28 md:pt-32 lg:pt-[12vh] h-full flex flex-col items-center justify-between pointer-events-none">
         
         {/* 3 & 4. Titles */}
         <motion.div variants={titlesContainerVariants} className="text-center z-10 space-y-2 md:space-y-3 mt-2 sm:mt-4 px-4 pointer-events-auto">
@@ -348,9 +296,9 @@ export default function Home() {
             variants={statsContainerVariants} 
             className="relative z-10 w-[92%] max-w-md mx-auto grid grid-cols-3 gap-2 py-3.5 px-3 rounded-2xl bg-bg-secondary/95 border border-border backdrop-blur-md shadow-2xl pointer-events-auto"
           >
-            <StatItem value={2} label={<>Years<br/>Experience</>} orientation="vertical" />
+            <StatItem value={3} label={<>Years<br/>Experience</>} orientation="vertical" />
             <StatItem value={15} label={<>Projects<br/>Completed</>} orientation="vertical" />
-            <StatItem value={8} label={<>Certificates<br/>Achieved</>} orientation="vertical" />
+            <StatItem value={20} label={<>Certificates<br/>Achieved</>} orientation="vertical" />
           </motion.div>
         </div>
 
@@ -364,9 +312,9 @@ export default function Home() {
 
         {/* Desktop: Left Stats (lg+) */}
         <motion.div variants={statsContainerVariants} className="hidden lg:flex absolute left-8 md:left-16 lg:left-24 top-1/2 -translate-y-1/2 flex-col gap-10 z-10 pointer-events-auto">
-          <StatItem value={2} label={<>Years<br/>Experience</>} />
+          <StatItem value={3} label={<>Years<br/>Experience</>} />
           <StatItem value={15} label={<>Projects<br/>Completed</>} />
-          <StatItem value={8} label={<>Certificates<br/>Achieved</>} />
+          <StatItem value={20} label={<>Certificates<br/>Achieved</>} />
         </motion.div>
 
         {/* 7b. Desktop Right Text (lg+) */}
@@ -378,9 +326,10 @@ export default function Home() {
 
         {/* 8a & 9a. Mobile Bottom Controls (< lg) */}
         <div className="lg:hidden w-full px-6 pb-8 pt-1 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-5 z-10 pointer-events-auto max-w-md mx-auto">
-          <motion.div variants={socialVariants} className="flex gap-6 text-[15px] font-medium text-text-secondary">
-            <Link href="https://linkedin.com/in/mohamad-arif-68402627a" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">LinkedIn</Link>
+          <motion.div variants={socialVariants} className="flex flex-wrap justify-center gap-4 sm:gap-6 text-[14px] sm:text-[15px] font-medium text-text-secondary">
+            <Link href="https://www.linkedin.com/in/mohamad-arif-68402627a/" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">LinkedIn</Link>
             <Link href="https://github.com/mohamadarif03" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">GitHub</Link>
+            <Link href="https://www.instagram.com/mhmdarif346/" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">Instagram</Link>
             <Link href="mailto:mohamadarif5392@gmail.com" className="hover:text-text-primary transition-colors py-2 min-h-[44px] flex items-center">Email</Link>
           </motion.div>
           <motion.div variants={buttonVariants}>
@@ -400,8 +349,9 @@ export default function Home() {
 
         {/* 9b. Desktop Bottom Left Links (lg+) */}
         <motion.div variants={socialVariants} className="hidden lg:flex absolute bottom-10 left-8 md:left-16 lg:left-24 gap-6 text-[15px] font-medium text-text-secondary z-10 pointer-events-auto">
-          <Link href="https://linkedin.com/in/mohamad-arif-68402627a" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">LinkedIn</Link>
+          <Link href="https://www.linkedin.com/in/mohamad-arif-68402627a/" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">LinkedIn</Link>
           <Link href="https://github.com/mohamadarif03" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">GitHub</Link>
+          <Link href="https://www.instagram.com/mhmdarif346/" target="_blank" rel="noopener noreferrer" className="hover:text-text-primary transition-colors">Instagram</Link>
           <Link href="mailto:mohamadarif5392@gmail.com" className="hover:text-text-primary transition-colors">Email</Link>
         </motion.div>
 
@@ -423,14 +373,19 @@ export default function Home() {
         </motion.div>
 
       </main>
+      </KineticGrid>
+        </div>
+      </div>
 
-      {/* Skills Marquee */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6, duration: 0.8 }}
-        className="w-full overflow-hidden bg-bg-secondary py-3 md:py-4 border-y border-border z-20 relative pointer-events-auto"
-      >
+      {/* Overlapping Content Sheet covering the Hero */}
+      <div className="relative z-20 bg-bg-primary shadow-[0_-25px_60px_rgba(0,0,0,0.6)] border-b border-border">
+        {/* Skills Marquee */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+          className="w-full overflow-hidden bg-bg-secondary py-3 md:py-4 border-y border-border relative pointer-events-auto"
+        >
         <div className="flex w-fit animate-marquee hover:[animation-play-state:paused]">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex items-center shrink-0">
@@ -499,8 +454,8 @@ export default function Home() {
                     whileHover={{ scale: 1.15, y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Link href="#" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
-                      <FaTwitter className="w-5 h-5" />
+                    <Link href="https://github.com/mohamadarif03" target="_blank" rel="noopener noreferrer" aria-label="GitHub Mohamad Arif" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
+                      <FaGithub className="w-5 h-5" />
                     </Link>
                   </motion.div>
                   <motion.div 
@@ -508,7 +463,7 @@ export default function Home() {
                     whileHover={{ scale: 1.15, y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Link href="#" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
+                    <Link href="https://www.linkedin.com/in/mohamad-arif-68402627a/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Mohamad Arif" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
                       <FaLinkedin className="w-5 h-5" />
                     </Link>
                   </motion.div>
@@ -517,8 +472,17 @@ export default function Home() {
                     whileHover={{ scale: 1.15, y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <Link href="#" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
+                    <Link href="https://www.instagram.com/mhmdarif346/" target="_blank" rel="noopener noreferrer" aria-label="Instagram Mohamad Arif" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
                       <FaInstagram className="w-5 h-5" />
+                    </Link>
+                  </motion.div>
+                  <motion.div 
+                    variants={aboutSocialItemVariants}
+                    whileHover={{ scale: 1.15, y: -3, transition: { duration: 0.25, ease: "easeOut" } }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Link href="mailto:mohamadarif5392@gmail.com" aria-label="Email Mohamad Arif" className="block text-text-secondary hover:text-accent transition-colors duration-200 cursor-pointer">
+                      <FaEnvelope className="w-5 h-5" />
                     </Link>
                   </motion.div>
                 </motion.div>
@@ -607,10 +571,18 @@ export default function Home() {
         <ProjectsSection />
       </div>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-border py-8 px-6 text-center text-xs font-mono text-text-secondary relative z-20 bg-bg-primary">
-        <p>&copy; {new Date().getFullYear()} Mohamad Arif. All rights reserved.</p>
-      </footer>
+      {/* Certifications 3D Panoramic Exhibition Section */}
+      <div id="certifications" className="border-t border-border">
+        <PanoramicSpreadHero />
+      </div>
+
+      {/* GitHub Activity & Contribution Skyline Section */}
+      <GithubSkylineSection />
+
+      </div>
+
+      {/* Cinematic Motion Footer */}
+      <CinematicFooter />
 
     </motion.div>
   );
