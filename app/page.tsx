@@ -334,7 +334,7 @@ export default function Home() {
           </motion.div>
           <motion.div variants={buttonVariants}>
             <ArrowFillButton 
-              href="/CV_Mohamad_Arif.pdf" 
+              href="/CV_Mohamad Arif.pdf" 
               btnText="Download CV" 
               className="bg-accent hover:bg-accent-hover"
               bgColor="#2563EB"
@@ -359,7 +359,7 @@ export default function Home() {
         <motion.div variants={buttonVariants} className="hidden lg:block absolute bottom-10 right-8 md:right-16 lg:right-24 z-10 pointer-events-auto">
           <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
             <ArrowFillButton 
-              href="/CV_Mohamad_Arif.pdf" 
+              href="/CV_Mohamad Arif.pdf" 
               btnText="Download CV" 
               className="bg-accent hover:bg-accent-hover"
               bgColor="#2563EB"
