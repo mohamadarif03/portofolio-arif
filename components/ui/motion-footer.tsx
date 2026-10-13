@@ -370,7 +370,7 @@ export function CinematicFooter({
               <div className="flex flex-wrap justify-center gap-3 sm:gap-4 w-full">
                 <MagneticButton 
                   as="a" 
-                  href="/cv.pdf" 
+                  href="/CV_Mohamad_Arif.pdf" 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="footer-glass-pill px-7 sm:px-10 py-3.5 sm:py-5 rounded-full text-text-primary font-bold text-sm md:text-base flex items-center gap-3 group min-h-[44px]"
